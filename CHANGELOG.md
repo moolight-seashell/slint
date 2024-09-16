@@ -70,6 +70,10 @@ All notable changes to this project are documented in this file.
  - Fixed generated getter and setter of alias properties in globals (#5855)
  - Use `raw-window-metal` to do layer creation in skia
 
+### Node API
+
+  - Moved `MapModel` to public api
+
 
 ## [1.7.2] - 2024-08-14
 
