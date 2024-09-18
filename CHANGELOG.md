@@ -72,7 +72,7 @@ All notable changes to this project are documented in this file.
 
 ### Node API
 
-  - Moved `MapModel` to public api
+  - Added `MapModel`.
 
 
 ## [1.7.2] - 2024-08-14
