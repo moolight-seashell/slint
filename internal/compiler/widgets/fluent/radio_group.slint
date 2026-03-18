@@ -1,0 +1,77 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+import { FluentFontSettings, FluentPalette } from "styling.slint";
+import { RadioButton } from "radio_button.slint";
+
+export struct RadioButtonData {
+    text: string,
+    subtext: string,
+}
+
+export component RadioGroup {
+    in property <string> title;
+    in property <bool> enabled: true;
+    in property <[RadioButtonData]> model: [];
+    in property <bool> vertical: true;
+    out property <bool> has-focus: root.focused-index >= 0;
+    in-out property <int> current-index: 0;
+
+    callback selected(int);
+
+    private property <int> focused-index: -1;
+
+    accessible-role: combobox;
+    accessible-label: root.title;
+    accessible-enabled: root.enabled;
+
+    VerticalLayout {
+        spacing: 8px;
+        padding-top: root.title != "" ? 16px : 0;
+        padding-bottom: 8px;
+        padding-left: 0;
+        padding-right: 0;
+
+        if root.title != "" : Text {
+            vertical-stretch: 0;
+            color: !root.enabled ? FluentPalette.text-disabled : FluentPalette.control-foreground;
+            font-size: FluentFontSettings.body-strong.font-size;
+            font-weight: FluentFontSettings.body-strong.font-weight;
+            text: root.title;
+        }
+
+        Rectangle {
+            vertical-stretch: 1;
+
+            if root.vertical : VerticalLayout {
+                spacing: 12px;
+
+                for item[index] in root.model : RadioButton {
+                    text: item.text;
+                    enabled: root.enabled;
+                    checked: root.current-index == index;
+
+                    toggled => {
+                        root.current-index = index;
+                        root.selected(index);
+                    }
+                }
+            }
+
+            if !root.vertical : HorizontalLayout {
+                spacing: 12px;
+
+                for item[index] in root.model : RadioButton {
+                    text: item.text;
+                    enabled: root.enabled;
+                    checked: root.current-index == index;
+
+                    toggled => {
+                        root.current-index = index;
+                        root.selected(index);
+                    }
+                }
+            }
+        }
+    }
+}

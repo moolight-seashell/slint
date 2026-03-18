@@ -1,0 +1,80 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: MIT
+
+import { RadioGroup, RadioButtonData } from "../../internal/compiler/widgets/fluent/radio_group.slint";
+import {RadioButton} from "../../internal/compiler/widgets/fluent/radio_button.slint";
+import { GroupBox } from "../../internal/compiler/widgets/fluent/groupbox.slint";
+
+
+
+export component RadioGroupExample {
+    width: 800px;
+    height: 600px;
+
+    VerticalLayout {
+        padding: 20px;
+        spacing: 20px;
+
+        // Vertical RadioGroup (preferred)
+        GroupBox {
+            title: "Favorite Fruit (Vertical - Preferred)";
+
+            RadioGroup {
+                title: "Select your favorite fruit";
+                vertical: true;
+                current-index: 0;
+                model: [
+                    { text: "Apple", subtext: "Crisp and sweet" },
+                    { text: "Pear", subtext: "Juicy and refreshing" },
+                    { text: "Banana", subtext: "Soft and creamy" },
+                    { text: "Orange", subtext: "Citrus and vitamin C rich" },
+                ];
+
+                selected(index) => {
+                    debug("Selected fruit:", index);
+                }
+            }
+        }
+
+        // Horizontal RadioGroup
+        GroupBox {
+            title: "Text Alignment (Horizontal Layout)";
+
+            RadioGroup {
+                title: "Choose alignment";
+                vertical: false;
+                current-index: 0;
+                model: [
+                    { text: "Left", subtext: "" },
+                    { text: "Center", subtext: "" },
+                    { text: "Right", subtext: "" },
+                ];
+
+                selected(index) => {
+                    debug("Selected alignment:", index);
+                }
+            }
+        }
+
+        // Individual RadioButton example
+        GroupBox {
+            title: "Individual RadioButton";
+
+            VerticalLayout {
+                spacing: 8px;
+
+                RadioButton {
+                    text: "Option 1";
+
+                    toggled => {
+                        debug("RadioButton toggled");
+                    }
+                }
+
+                RadioButton {
+                    text: "Option 2";
+                }
+            }
+        }
+    }
+}

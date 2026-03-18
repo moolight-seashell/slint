@@ -1,0 +1,112 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+import { FluentFontSettings, FluentPalette, Icons } from "styling.slint";
+import { FocusBorder } from "components.slint";
+
+export component RadioButton {
+    in property <string> text;
+    in property <bool> enabled <=> touch-area.enabled;
+    in property <bool> checked;
+    out property <bool> has-focus: focus-scope.has-focus;
+
+    callback toggled;
+
+    private property <color> text-color: FluentPalette.foreground;
+
+    min-height: max(18px, layout.min-height);
+    accessible-checkable: true;
+    accessible-enabled: root.enabled;
+    accessible-label: root.text;
+    accessible-checked <=> root.checked;
+    accessible-role: checkbox;
+    accessible-action-default => {
+        if (root.enabled) {
+           root.toggled();
+        }
+    }
+    forward-focus: focus-scope;
+
+    states [
+        disabled when !root.enabled : {
+            outer.border-color: root.checked ? FluentPalette.control-strong-stroke-disabled : transparent;
+            outer.background: root.checked ? FluentPalette.accent-disabled : FluentPalette.control-alt-disabled;
+            root.text-color: FluentPalette.text-disabled;
+        }
+        pressed when touch-area.pressed : {
+            outer.background: transparent;
+            inner.border-color: root.checked ? FluentPalette.tertiary-accent-background : FluentPalette.control-alt-quartiary;
+            outer.border-color: root.checked ? transparent : FluentPalette.control-strong-stroke-disabled;
+            inner.border-width: root.checked ? 7px : 5px;
+        }
+        hover when touch-area.has-hover : {
+            outer.background: root.checked ? transparent : FluentPalette.control-alt-tertiary;
+            inner.border-width: root.checked ? 5px : 0px;
+        }
+    ]
+
+    animate text-color { duration: 200ms; }
+
+    layout := HorizontalLayout {
+        spacing: 12px;
+
+        outer := Rectangle {
+            width: 20px;
+            height: self.width;
+            y: (parent.height - self.height) / 2;
+            background: root.checked ? transparent : FluentPalette.control-alt-secondary;
+            border-radius: self.width / 2;
+            border-width: 1px;
+            border-color: FluentPalette.control-strong-stroke;
+
+            animate background, border-color { duration: 150ms; }
+
+            inner := Rectangle {
+                width: parent.width;
+                height: self.width;
+                border-radius: self.width / 2;
+                background: transparent;
+                border-width: 6px;
+                border-color: root.checked ? FluentPalette.accent-background : transparent;
+
+                animate border-width { duration: 150ms; }
+            }
+        }
+
+        if root.text != "" : Text {
+            text: root.text;
+            color: root.text-color;
+            font-size: FluentFontSettings.body.font-size;
+            font-weight: FluentFontSettings.body.font-weight;
+            vertical-alignment: center;
+            horizontal-alignment: left;
+        }
+    }
+
+    touch-area := TouchArea {
+        clicked => {
+            if (root.enabled) {
+                root.toggled();
+            }
+        }
+    }
+
+    focus-scope := FocusScope {
+        x: 0;
+        width: 0; // Do not react on clicks
+        enabled <=> root.enabled;
+
+        key-pressed(event) => {
+            if (event.text == " " || event.text == "\n") {
+                touch-area.clicked();
+                return accept;
+            }
+            return reject;
+        }
+    }
+
+    // focus border
+    // if root.has-focus && root.enabled : FocusBorder {
+    //     border-radius: 4px;
+    // }
+}
