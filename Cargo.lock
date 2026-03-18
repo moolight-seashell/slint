@@ -9923,6 +9923,7 @@ dependencies = [
  "smol_str 0.3.2",
  "spin_on",
  "tikv-jemallocator",
+ "tokio",
  "tracing",
  "tracing-subscriber",
  "wasm-bindgen",
