@@ -9900,6 +9900,7 @@ dependencies = [
  "console_error_panic_hook",
  "crossbeam-channel",
  "dissimilar",
+ "futures-util",
  "i-slint-backend-selector",
  "i-slint-backend-testing",
  "i-slint-backend-winit",
