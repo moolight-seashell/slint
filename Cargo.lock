@@ -8095,6 +8095,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "preview-protocol"
+version = "1.16.0"
+dependencies = [
+ "lsp-types",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "printerdemo"
 version = "1.16.0"
 dependencies = [
@@ -9910,10 +9919,10 @@ dependencies = [
  "itertools 0.14.0",
  "js-sys",
  "lsp-server",
- "lsp-types",
  "muda",
  "nucleo-matcher",
  "objc2-foundation 0.3.2",
+ "preview-protocol",
  "send_wrapper",
  "serde",
  "serde-wasm-bindgen",
@@ -10195,7 +10204,7 @@ version = "0.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c1c97747dbf44bb1ca44a561ece23508e99cb592e862f22222dcf42f51d1e451"
 dependencies = [
- "heck 0.4.1",
+ "heck 0.5.0",
  "proc-macro2",
  "quote",
  "syn 2.0.117",

@@ -3,7 +3,7 @@
 
 //! Code to help with writing tests for the language server
 
-use lsp_types::{Diagnostic, Url};
+use preview_protocol::lsp_types::{self, Diagnostic, Url};
 
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
@@ -305,7 +305,7 @@ fn preview_file_recompiled_when_dependency_changes() {
     // - main.slint NOT in open_urls (simulating it was closed in the editor)
     let ctx = Rc::new(Context {
         document_cache: cache.into(),
-        to_show: RefCell::new(Some(common::PreviewComponent {
+        to_show: RefCell::new(Some(preview_protocol::PreviewComponent {
             url: main_url.clone(),
             component: None,
         })),
