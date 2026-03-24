@@ -1,12 +1,12 @@
 
 # Slint SC Safety Manual
-Slint SC is the “ISO 26262 compliant subset” of Slint. 
+Slint SC is the “ISO 26262 compliant subset” of Slint.
 
 ## Purpose of Documents
 
 This document contains a Safety Manual and a Qualification Plan.
 
-The Safety Manual describes slint-compiler, its library components, and how to use them safely. 
+The Safety Manual describes slint-compiler, its library components, and how to use them safely.
 
 The Qualification Plan contains the requirements/constraint IDs, a list of safety-critical tests, info about which tests cause known failures, with fixed-in version#, and github issue ID. This document needs to be updated after each version release. It also contains lists of roles&responsibilities and other lists.
 
@@ -20,25 +20,25 @@ The ISO 26262 standard requires us to track and report known safety-critical iss
 
 ### ASIL D Capable
 
-ASIL (Automotive Safety Integrity Level) describes the risk level of something. ASIL D=highest, C=high, B=medium, A=low risk, QM = not safety critical. 
+ASIL (Automotive Safety Integrity Level) describes the risk level of something. ASIL D=highest, C=high, B=medium, A=low risk, QM = not safety critical.
 
 <insert diagram?>
 
-Since a compiler and a toolkit don’t have a specific vehicle function, they don’t have an intrinsic ASIL derived from a HARA (Hazard Analysis and Risk Assessment). 
+Since a compiler and a toolkit don’t have a specific vehicle function, they don’t have an intrinsic ASIL derived from a HARA (Hazard Analysis and Risk Assessment).
 
 **The "Maximum Requirement" Rule:** If a single component (like a "Warning Icon" widget) is intended to display a "Brake Failure" message, it needs to be **ASIL D Capable**.
 
-Slint SC is a “Safety Element out of Context” (SEooC). The GUI components of Slint SC can be used for mission-critical digital instrument clusters. 
+Slint SC is a “Safety Element out of Context” (SEooC). The GUI components of Slint SC can be used for mission-critical digital instrument clusters.
 
 ### Specific Requirements
 
-Each Requirement should have a descriptive ID that begins with SR_, a description, and ASIL=D. 
+Each Requirement should have a descriptive ID that begins with SR_, a description, and ASIL=D.
 
 The ISO 26262 standard tells us what properties a safety-critical system must have (traceability, freedom from interference, determinism, etc.), but it doesn't tell us how to write those requirements for a GUI toolkit. The following sections contain some specific, actionable engineering requirements that a project like Slint SC needs to satisfy to be used in an ASIL D context.
 
 #### SR_Bounded_Execution_Time
 
-Slint SC shall guarantee a strictly bounded maximum execution time for rendering a single frame, ensuring that the critical rendering loop never blocks the main execution thread beyond the hardware display refresh interval (e.g., 16.6ms for 60Hz). 
+Slint SC shall guarantee a strictly bounded maximum execution time for rendering a single frame, ensuring that the critical rendering loop never blocks the main execution thread beyond the hardware display refresh interval (e.g., 16.6ms for 60Hz).
 
 **(Reference: ISO 26262-6 Annex D.2.2 "Timing and execution", which identifies "incorrect allocation of execution time" and "blocking of execution" as interference faults.)**
 
@@ -104,30 +104,30 @@ Slint SC architecture enforces the separation of business logic (backend/state) 
 
 #### SR_CONCURRENCY_CONTROL
 
-To avoid race conditions that could yield incorrect displays, the core UI update, layout, and rendering commands must execute sequentially on a single managed thread or explicitly defined thread pool with static concurrency constraints. This makes it possible to show that the i-slint-core runtime, especially the property binding evaluation and Z-ordering layout mechanisms, are fully deterministic, bounded, and provably testable. 
+To avoid race conditions that could yield incorrect displays, the core UI update, layout, and rendering commands must execute sequentially on a single managed thread or explicitly defined thread pool with static concurrency constraints. This makes it possible to show that the i-slint-core runtime, especially the property binding evaluation and Z-ordering layout mechanisms, are fully deterministic, bounded, and provably testable.
 
 ## Components of the System
 
 This is what is included in Slint SC:
 
 * slint-compiler
-* Individual slint language features 
+* Individual slint language features
 * Features offered by specific crates that are part of the Slint Rust library
 
-Each of these things can have a **Usage** and a **Constraints** section. 
+Each of these things can have a **Usage** and a **Constraints** section.
 
-Each feature of the language or a library can map to a Requirement ID, and have 1 or more code test-examples. 
+Each feature of the language or a library can map to a Requirement ID, and have 1 or more code test-examples.
 
 <Insert diagram that shows how the components/crates relate to each other?>
 
 ### Installation Procedures
 
-How to install Slint SC: the compiler, and its related libraries. 
+How to install Slint SC: the compiler, and its related libraries.
 
 ### Usage: slint-compiler
 
-This is the only executable in slint. Describe how it is used. 
-TODO: Add a 'Constraints' section for this command. 
+This is the only executable in slint. Describe how it is used.
+TODO: Add a 'Constraints' section for this command.
 
 ## Constraints
 
@@ -137,7 +137,7 @@ For slint-compiler, this section would describe which command line options are r
 
 For APIs, the constraints might explain that some functions are experimental and can not be used safely yet. Or, that certain values passed as parameters into functions are not safe? Or, that certain language features can only be used a certain way to be safe.
 
-Each Constraint should have an ID that begins with CON_, and also have a Rationale, Impact, and Mitigation. 
+Each Constraint should have an ID that begins with CON_, and also have a Rationale, Impact, and Mitigation.
 
 ## Slint Development Cycle
 
@@ -163,37 +163,37 @@ Issues are tracked here: <https://github.com/slint-ui/slint/issues>
 
 ## Handling Unsafety
 
-Q: What is unsafe code? Do we have examples? 
+Q: What is unsafe code? Do we have examples?
 
-Q: What is the definition of a “safety-critical error”? 
+Q: What is the definition of a “safety-critical error”?
 
-In the case of rustc, unsafety is “the presence of code that the compiler cannot automatically prove with respect to the memory safety guarantees of Rust”. In the case of Coco, it is whenever an incorrect number is reported in a coverage report. 
+In the case of rustc, unsafety is “the presence of code that the compiler cannot automatically prove with respect to the memory safety guarantees of Rust”. In the case of Coco, it is whenever an incorrect number is reported in a coverage report.
 
 The definition of “safety-critical” for slint-compiler, or each specific slint language or library feature, may be different.
 
 ### Failure Scenarios
 
-Describing specific possible failure scenarios (especially in the context of software running on a car) can lead to the definitions of Requirements and Constraints. 
+Describing specific possible failure scenarios (especially in the context of software running on a car) can lead to the definitions of Requirements and Constraints.
 
-This list is created during the Hazard Analysis and Risk Assessment (HARA) phase. 
+This list is created during the Hazard Analysis and Risk Assessment (HARA) phase.
 
 ### Known Issues
 
-Q: What are the safety critical issues (referenced by github issue ID) that we have faced? Which ones are fixed? Fixed in which version? Which testcases test them?  We can start with those as we are developing our validator package. 
+Q: What are the safety critical issues (referenced by github issue ID) that we have faced? Which ones are fixed? Fixed in which version? Which testcases test them?  We can start with those as we are developing our validator package.
 
-This list/table could be auto-generated based on what is in the github issue database, if the relevant issues were each properly tagged with “safety-critical”. 
+This list/table could be auto-generated based on what is in the github issue database, if the relevant issues were each properly tagged with “safety-critical”.
 
 ## Validation - Running the Tests
 
 * Validation activities (see ISO 26262-4 section 9)
 
-Validation involves running a set of safety-critical tests. We describe how to run them here, and how to understand the results.  Each test should be described in a section here, tagged with appropriate requirement IDs. 
+Validation involves running a set of safety-critical tests. We describe how to run them here, and how to understand the results.  Each test should be described in a section here, tagged with appropriate requirement IDs.
 
-We should probably write a Validator GUI that runs the safety-critical tests and shows the results in a nice way, and then the instructions for running Validator will go here. 
+We should probably write a Validator GUI that runs the safety-critical tests and shows the results in a nice way, and then the instructions for running Validator will go here.
 
 ## Activities for the external assessment of functional safety
 
-The functional safety is assessed independently by XYZ GmbH in ABCD, Germany. 
+The functional safety is assessed independently by XYZ GmbH in ABCD, Germany.
 
 ## Policy and strategy for achieving functional safety
 
@@ -201,8 +201,8 @@ The safety and quality of the system are the primary objectives of all managemen
     • Adequate qualification of employees
     • A culture of safe working
     • Compliance with the safety life cycle to avoid systematic errors
-    • Precise, complete documentation 
-    • Compliance with procedures and measures 
+    • Precise, complete documentation
+    • Compliance with procedures and measures
     • Independent verification of all work results
     • Processes are work products that are constantly being improved.
     • Technical support, use of tools, automation where possible.
