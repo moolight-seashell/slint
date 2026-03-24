@@ -22,30 +22,31 @@ The ISO 26262 standard requires us to track and report known safety-critical iss
 
 ASIL (Automotive Safety Integrity Level) describes the risk level of something. ASIL D=highest, C=high, B=medium, A=low risk, QM = not safety critical. 
 
-Since a compiler and a toolkit don’t have a specific vehicle function, they don’t have an intrinsic ASIL derived from a HARA (Hazard Analysis and Risk Assessment). Slint SC is a “Safety Element out of Context” (SEooC). The GUI components of Slint SC can be used for mission-critical digital instrument clusters. 
+<insert diagram?>
+
+Since a compiler and a toolkit don’t have a specific vehicle function, they don’t have an intrinsic ASIL derived from a HARA (Hazard Analysis and Risk Assessment). 
 
 **The "Maximum Requirement" Rule:** If a single component (like a "Warning Icon" widget) is intended to display a "Brake Failure" message, it needs to be **ASIL D Capable**.
 
-### Failure Scenarios
-
-Describing specific possible failure scenarios (especially in the context of software running on a car) can lead to the definitions of Requirements and Constraints. 
-
-These lists are created during the Hazard Analysis and Risk Assessment (HARA) phase. 
+Slint SC is a “Safety Element out of Context” (SEooC). The GUI components of Slint SC can be used for mission-critical digital instrument clusters. 
 
 ### Specific Requirements
 
-
-Each Requirement should have a descriptive ID that begins with SR_, a description. ASIL=D. 
+Each Requirement should have a descriptive ID that begins with SR_, a description, and ASIL=D. 
 
 The ISO 26262 standard tells us what properties a safety-critical system must have (traceability, freedom from interference, determinism, etc.), but it doesn't tell us how to write those requirements for a GUI toolkit. The following sections contain some specific, actionable engineering requirements that a project like Slint SC needs to satisfy to be used in an ASIL D context.
 
 #### SR_Bounded_Execution_Time
 
-Slint SC shall guarantee a strictly bounded maximum execution time for rendering a single frame, ensuring that the critical rendering loop never blocks the main execution thread beyond the hardware display refresh interval (e.g., 16.6ms for 60Hz).
+Slint SC shall guarantee a strictly bounded maximum execution time for rendering a single frame, ensuring that the critical rendering loop never blocks the main execution thread beyond the hardware display refresh interval (e.g., 16.6ms for 60Hz). 
+
+**(Reference: ISO 26262-6 Annex D.2.2 "Timing and execution", which identifies "incorrect allocation of execution time" and "blocking of execution" as interference faults.)**
 
 #### SR_Static_Memory_Allocation
 
-Following initialization, Slint SC shall not perform dynamic memory allocation (e.g., `malloc`, `new`) during the continuous rendering loop. All memory pools, vertex buffers, and command buffers must be pre-allocated.
+Following initialization, Slint SC shall not perform dynamic memory allocation (e.g., `malloc`, `new`) during the continuous rendering loop. All memory pools, vertex buffers, and command buffers must be pre-allocated.
+
+*Note on Rust:* While safe Rust inherently prevents memory corruption (addressing ISO 26262-6 Annex D.2.3 "Memory" faults), dynamic allocation can still lead to Out-Of-Memory (OOM) panics. Since a panic aborts the thread, it violates execution determinism. Therefore, strict bounded pre-allocation is still required even in safe Rust to guarantee freedom from interference.
 
 #### SR_State_Machine_Determinism
 
@@ -55,17 +56,17 @@ Slint SC's internal state machine for UI component lifecycle, event propagation,
 
 Slint SC shall provide a mechanism to explicitly separate defined safety-critical UI elements (e.g., ASIL A/B telltales like ABS warning, brake failure) from non-safety-critical (QM) infotainment graphics.
 
+*Note on Architecture:* While absolute spatial separation is often achieved at the hardware or hypervisor level (running safety-critical elements in separate MCUs), Slint SC must still ensure that its rendering output adheres to "Freedom from interference" (ISO 26262-6 Section 7.4.11 and Annex D). Its internal state must not corrupt or occlude the separated composite layers.
+
 #### SR_Z_ORDER_GUARANTEE
 
 Slint SC shall mathematically or structurally guarantee that elements classified as "Safety-Critical" are rendered at the highest Z-index and cannot be occluded, clipped, or obscured by any QM-level graphics or animations.
 
-#### SR_HARDWARE_CRC_SUPPORT
-
-Slint SC shall output framebuffer fragments or layers in a manner that supports hardware-assisted cyclic redundancy checks (CRC). It must provide the bounding box coordinates of safety-critical elements to external watchdog hardware to continuously verify that the correct pixels were driven to the display.
-
 #### SR_LATE_COMPOSITING
 
 Slint SC's architecture shall support running safety-critical rendering on a separate, ASIL-certified hardware layer or hypervisor partition, compositing the result over the QM-level graphics at the physical display controller level.
+
+(This is related to SR_Safety_Critical_Separation)
 
 #### SR_RESOURCE_FALLBACK
 
@@ -81,15 +82,21 @@ Slint SC must trigger a software or hardware watchdog timer at a specified inter
 
 #### SR_CODE_GENERATION
 
-Slint-compiler’s output must be verifiable/qualified according to ISO 26262 Part 8, Clause 11.
+Slint-compiler’s output must be verifiable/qualified according to **ISO 26262-8 Clause 11 (Confidence in the use of software tools)**. If the compiler is used to generate safety-critical C++ or Rust code from `.slint` markup, the tool itself requires a Software Tool Qualification Report.
 
 #### SR_CODING_STANDARDS_COMPLIANCE
 
-Generated code and the underlying GUI runtime library shall be statically analyzable and comply with MISRA C (2012), MISRA C++ (2008 / AUTOSAR C++14), or equivalent safety-aware subsets (like `unsafe` block management in Rust, when using Rust).
+Generated code and the underlying GUI runtime library shall be statically analyzable and comply with MISRA C (2012), MISRA C++ (2008 / AUTOSAR C++14), or equivalent safety-aware subsets.
+
+*Note on Rust Standards:* For Rust, compliance means adhering to the **Ferrocene Language Specification** (the ISO 26262 ASIL D qualified Rust toolchain) and the emerging **AUTOSAR Rust guidelines**. It also requires strict, auditable management and encapsulation of `unsafe` blocks.
 
 #### SR_TEST_COVERAGE
 
-Slint SC must support headless or offline automated testing frameworks capable of running on CI/CD pipelines to verify layout engines, event propagation, and state transitions. Code Coverage should be measurable (can we do that in Rust?) aiming for >90% code coverage.
+Slint SC must support headless or offline automated testing frameworks capable
+of running on CI/CD pipelines to verify layout engines, event propagation, and
+state transitions.
+
+*Note on Rust Test Coverage:* Code coverage is highly measurable in Rust using LLVM source-based coverage tools such as `cargo-tarpaulin` or `grcov`. The goal for ASIL D is typically strict structural coverage, requiring >90% statement/branch coverage and often Modified Condition/Decision Coverage (MC/DC) at the unit test level.
 
 #### SR_SEPARATION_OF_CONCERNS
 
@@ -134,7 +141,7 @@ Each Constraint should have an ID that begins with CON_, and also have a Rationa
 
 ## Slint Development Cycle
 
-<https://github.com/slint-ui/slint/blob/master/docs/internal/processes.md>
+(TODO: summarize relevant details from https://github.com/slint-ui/slint/blob/master/docs/internal/processes.md)
 
 ### Development tools, hardware and software components
 
@@ -142,13 +149,13 @@ What tools do we use to develop slint? (ISO 26262-8 sections 11, 12 and 13)
 
 ### Procedure for Version Control/Configuration Management
 
-Here we describe how slint is developed, how git and github are used, etc.
+Slint is an open-source project hosted on GitHub. https://github.com/slint-ui/slint
 
 Configuration management (ISO 26262-8 section 7)
 
 ### CI system used
 
-Q: What CI system do we use? We describe what tasks are done after each push, and if we have nightly tasks, we describe those too. 
+The CI is driven by Github Actions. The CI is triggered for any PR (including drafts) to the master branch, or to a branch that starts with feature/. The CI is also triggered for every push to the master branch. A new commit on a branch will cancel the previous CI run on that branch if it is still running.
 
 ### Reporting Bugs
 
@@ -164,6 +171,12 @@ In the case of rustc, unsafety is “the presence of code that the compiler cann
 
 The definition of “safety-critical” for slint-compiler, or each specific slint language or library feature, may be different.
 
+### Failure Scenarios
+
+Describing specific possible failure scenarios (especially in the context of software running on a car) can lead to the definitions of Requirements and Constraints. 
+
+This list is created during the Hazard Analysis and Risk Assessment (HARA) phase. 
+
 ### Known Issues
 
 Q: What are the safety critical issues (referenced by github issue ID) that we have faced? Which ones are fixed? Fixed in which version? Which testcases test them?  We can start with those as we are developing our validator package. 
@@ -178,7 +191,7 @@ Validation involves running a set of safety-critical tests. We describe how to r
 
 We should probably write a Validator GUI that runs the safety-critical tests and shows the results in a nice way, and then the instructions for running Validator will go here. 
 
-## Activities for the assessment of functional safety
+## Activities for the external assessment of functional safety
 
 The functional safety is assessed independently by XYZ GmbH in ABCD, Germany. 
 
